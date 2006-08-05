@@ -221,7 +221,7 @@ Building 'lcal':
 
            In truth, this change was first made (recently) to the 'lcal'
            application, where the inefficiencies are greater.  Logically,
-           however, 'pcal' benefitted from the same change, so it was made
+           however, 'pcal' benefited from the same change, so it was made
            there as well.
 
          - Provided comments in the output file for many of the PostScript
