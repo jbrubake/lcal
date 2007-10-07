@@ -1,4 +1,4 @@
-static char VERSION_STRING[] = "@(#)lcal v2.0.0 - generate full-year Postscript lunar (moon phases) calendars";
+static char VERSION_STRING[] = "@(#)lcal v2.1.0 - generate full-year Postscript lunar (moon phases) calendars";
 /* ---------------------------------------------------------------------------
 
    lcal.c
@@ -15,6 +15,19 @@ static char VERSION_STRING[] = "@(#)lcal v2.0.0 - generate full-year Postscript 
      
    Revision history:
 
+	2.1.0
+		B.Marr		2007-10-07
+		
+		Eliminated the '-i' command-line option to invert colors.  It
+		became unnecessary with the modification of the '-s'
+		command-line option described below.
+		
+		Modified '-s' command-line option to specify up to 4 colors
+		(text color, page background color, dark moon color, and light
+		moon color) instead of just 'background' and 'foreground'.
+		This gives much greater control of the page colorization and
+		allows nicer-looking colorized calendars.
+		
 	2.0.0
 		B.Marr		2006-07-20
 		
@@ -123,12 +136,6 @@ static char VERSION_STRING[] = "@(#)lcal v2.0.0 - generate full-year Postscript 
 
    */
 
-/* split string into two substrings at separator 'c' */
-#define SPLIT(str, str1, str2, c) \
-   do { char *p; \
-   str2 = ((p = strrchr(str, c))) ? (*p = '\0', ++p) : ""; \
-   if ((p = strchr(str1 = str, c))) *p = '\0'; } while (0)
-
 /* ---------------------------------------------------------------------------
 
    Data Declarations (including externals)
@@ -178,8 +185,6 @@ flag_usage_str_typ flag_tbl[] = {
    
    { F_SHADING, TRUE },
    
-   { F_INVERT, FALSE },
-   
    { F_HELP, FALSE },
    { F_USAGE, FALSE },
    { F_VERSION, FALSE },
@@ -223,11 +228,8 @@ flag_msg_str_typ flag_msg[] = {
 #endif
 	{ END_GROUP },
 
-	{ F_SHADING,	W_SHADING,	"specify back/foreground colors (grayscale or r:g:b)",	NULL },
-	{ ' ',		NULL,		" ",							SHADING },
-	{ END_GROUP },
-
-	{ F_INVERT,	NULL,		"invert colors (white moons on black background)",	NULL },
+	{ F_SHADING,	W_SHADING,	"specify text/background/moondark/moonlight colors (grayscale or r:g:b)",	NULL },
+	{ ' ',		NULL,		" ",							DEFAULT_SHADING },
 	{ END_GROUP },
 
 	{ F_TIMEZONE,	W_VALUE,	"specify alternate time zone",				TIMEZONE },
@@ -281,7 +283,7 @@ char y_offset[STRSIZ] = Y_OFFSET;
 
 int draw_day_of_week_inside_moon = WEEKDAYS;   /* -W */
 
-char shading[STRSIZ] = SHADING;   /* -i, -s */
+char shading[STRSIZ] = DEFAULT_SHADING;   /* -s */
 
 char time_zone[STRSIZ] = TIMEZONE;   /* -z */
 
@@ -518,48 +520,62 @@ char * set_rgb (char *s)
       This utility routine was borrowed from 'pcal'.
 
 */
-void define_shading (register char *orig_shading,
-                     register char *new_shading,
-                     register char *dflt_shading)
+void define_shading (char *orig_shading, char *new_shading, char *dflt_shading)
 {
-   char *orig_bg, *new_bg, *dflt_bg, *orig_fg, *new_fg, *dflt_fg;
-   char tmp1[STRSIZ], tmp2[STRSIZ], tmp3[STRSIZ];
-   double v;
-   
+   char tmp1[STRSIZ], tmp2[STRSIZ];
+   char *p1 = NULL, *p2 = NULL, *p3 = NULL, *p4 = NULL;
+
    /* use default date/fill if new _shading is null */
    if (new_shading == NULL || new_shading[0] == '\0') {
       strcpy(orig_shading, dflt_shading);
       return;
    }
 
-   /* split old, new, and default shadings into background/foreground
-    * components
-    */
-   SPLIT(orig_shading, orig_bg, orig_fg, '/');
-   
-   new_shading = strcpy(tmp1, new_shading);
-   SPLIT(new_shading, new_bg, new_fg, '/');
-   
-   dflt_shading = strcpy(tmp2, dflt_shading);
-   SPLIT(dflt_shading, dflt_bg, dflt_fg, '/');
-   
-   /* replace invalid fields from new shading with default values */
-   if (new_fg[0] && strchr(new_fg, RGB_CHAR) == NULL && 
-       ((v = atof(new_fg)) <= 0.0 || v > 1.0)) {
-      new_fg = dflt_fg;
-   }
-   if (new_bg[0] && strchr(new_bg, RGB_CHAR) == NULL &&
-       ((v = atof(new_bg)) <= 0.0 || v > 1.0)) {
-      new_bg = dflt_bg;
+   strcpy(tmp1, new_shading);
+   p1 = tmp1;
+
+   if ((p2 = strchr(p1, '/')) != NULL) {
+      *p2++ = '\0';
+      if ((p3 = strchr(p2, '/')) != NULL) {
+         *p3++ = '\0';
+         if ((p4 = strchr(p3, '/')) != NULL) {
+            *p4++ = '\0';
+         }
+      }
    }
 
-   /* replace fields of old shading with specified fields from new */
+   strcpy(orig_shading, p1);
    
-   strcpy(tmp3, new_bg[0] ? new_bg : orig_bg);
-   strcat(tmp3, "/");
-   strcat(tmp3, new_fg[0] ? new_fg : orig_fg);
-   
-   strcpy(orig_shading, tmp3);
+   if (p2 == NULL) {
+      sprintf(tmp2, "/%s/%s/%s", 
+              DEFAULT_PAGE_BACKGROUND_COLOR, 
+              DEFAULT_MOON_DARK_COLOR,
+              DEFAULT_MOON_LIGHT_COLOR);
+      strcat(orig_shading, tmp2);
+   }
+   else {
+      strcat(orig_shading, "/");
+      strcat(orig_shading, p2);
+      if (p3 == NULL) {
+         sprintf(tmp2, "/%s/%s", 
+                 DEFAULT_MOON_DARK_COLOR,
+                 DEFAULT_MOON_LIGHT_COLOR);
+         strcat(orig_shading, tmp2);
+      }
+      else {
+         strcat(orig_shading, "/");
+         strcat(orig_shading, p3);
+         if (p4 == NULL) {
+            sprintf(tmp2, "/%s", 
+                    DEFAULT_MOON_LIGHT_COLOR);
+            strcat(orig_shading, tmp2);
+         }
+         else {
+            strcat(orig_shading, "/");
+            strcat(orig_shading, p4);
+         }
+      }
+   }
 
    return;
 }
@@ -919,9 +935,9 @@ double calc_phase (int month, int inday, int year)
 */
 void write_psfile (int year)
 {
-   int month, day, fudge1, fudge2, invert_moons;
+   int month, day, fudge1, fudge2;
    double phase;
-   char *off, *p, tmp[STRSIZ];
+   char *off, *p, *p2, *p3, *p4, tmp[STRSIZ];
    static char *cond[2] = {"false", "true"};
    char time_str[50];
    time_t curr_tyme;
@@ -1045,10 +1061,14 @@ void write_psfile (int year)
    /* background and foreground colors */
    
    strcpy(tmp, shading);
-   *(p = strchr(tmp, '/')) = '\0';
-   printf("/setbackground { %s } def\n", set_rgb(tmp));
-   printf("/setforeground { %s } def\n", set_rgb(++p));
-   
+   *(p2 = strchr(tmp, '/')) = '\0'; p2++;
+   *(p3 = strchr(p2, '/')) = '\0'; p3++;
+   *(p4 = strchr(p3, '/')) = '\0'; p4++;
+   printf("/setforeground { %s } def\n", set_rgb(tmp));
+   printf("/setbackground { %s } def\n", set_rgb(p2));
+   printf("/setmoondark { %s } def\n", set_rgb(p3));
+   printf("/setmoonlight { %s } def\n", set_rgb(p4));
+
    /* disable duplex mode (if supported) */
    
    printf("statusdict (duplexmode) known {\n");
@@ -1348,6 +1368,12 @@ void write_psfile (int year)
    printf("  gsave\n");
    printf("  currentpoint translate\n");
    printf("  newpath\n");
+
+   printf("  setmoonlight\n");
+   printf("  0 0 radius\n");
+   printf("  0 360 arc fill\n");
+   printf("  setmoondark\n");
+
    printf("  phase halfperiod .01 sub ge phase halfperiod .01 add le and {\n");
    printf("    0 0 radius\n");
    printf("    0 360 arc stroke\n");
@@ -1502,19 +1528,11 @@ void write_psfile (int year)
    }
 
    printf(" ] def\n");
-   
-   /* invert moon phases (actually shift by 1/2 cycle, i.e., print first
-    * quarter as third quarter, etc.) if background color is darker than
-    * foreground color - thus ensuring that the visible portion of the moon is
-    * printed in the lighter color
-    */
-   invert_moons = is_bg_darker();
-   
+
    printf("/moon_phases [\n");
    for (day = 1; day <= 31; day++) {
       for (month = JAN; month <= DEC; month++) {
          phase = calc_phase(month, day, year);
-         if (invert_moons) phase = fmod(phase + 0.5, 1.0);
          if (day <= LENGTH_OF(month, year)) {
             /* make sure printf() doesn't round "phase" up to 1.0 when printing it */
             printf("%.3f ", ((phase) >= 0.9995 ? 0.0 : (phase)));
@@ -1632,7 +1650,7 @@ int get_args (char **argv, int curr_pass, char *where)
          break;
 
       case F_SHADING:   /* set background/foreground shading */
-         define_shading(shading, parg, SHADING);
+         define_shading(shading, parg, DEFAULT_SHADING);
          break;
          
       case F_HELP:   /* request "help" message */
@@ -1667,10 +1685,6 @@ int get_args (char **argv, int curr_pass, char *where)
          draw_day_of_week_inside_moon = !(WEEKDAYS);
          break;
 
-      case F_INVERT:   /* print white-on-black */
-         strcpy(shading, INVERT);
-         break;
-         
       case F_XOFFSET:   /* X offset fudge factors */
          strcpy(x_offset, parg ? parg : X_OFFSET);
          break;

@@ -95,6 +95,103 @@ Building 'lcal':
 -----------------------------------------------------------------------------
 -----------------------------------------------------------------------------
 
+"Lcal" Version 2.1.0
+
+   This release of 'lcal' includes additional functionality and an update of
+   the associated documentation.
+
+   Major changes:
+
+      1) New functionality:
+
+         - Provided enhanced colorization options.
+
+           In the past, 'lcal' only allowed you to set the 'background' and
+           'foreground' options, via the '-s' command-line option (with the
+           '-i' option to invert the colors).
+
+           While adequate for basic colorization, use of those options
+           provided limited control of the colorization.  Also, certain
+           colorization selections had the undesired side effect of creating
+           unintuitive interactions with the colors of the light and dark
+           portions of the moons.
+           
+           Because of those limitations, it was decided to greatly modify the
+           meaning of the original '-s' (shading) command-line option.
+
+           Basically, there are 4 colors which one might want to individually
+           control on a lunar calendar:
+
+              (1) the color of the text (i.e. the labels for month,
+                  day-of-month, year, and day-of-week)
+
+              (2) the overall page background color
+
+              (3) the color of the dark portion of the moon
+
+              (4) the color of the light portion of the moon
+
+           Based on that logic, the '-s' option now takes up to 4 color
+           specifications, in the order shown above.
+
+           As in the past, a color can be specified with a single value (in
+           integer or floating point format), in which case it is assumed to
+           be a grey-scale color (0=black, 1=white).  Alternatively, a color
+           can be specified with 3 colon-separated values (each one in integer
+           and/or floating point format), in which case it is assumed to be a
+           RGB triplet (1:0:0=red, 0:1:0=green, 0:0:1=blue).
+
+           The inspiration for this change (and a bit of useful PostScript
+           sample code) came from Juergen Weigert, who correctly stated that
+           "The pale white of the moon comes out more impressivly, if the
+           background is not also white."
+
+           Like Juergen, I find that a page printed with a light grey
+           background (e.g. "-s 0/0.8") looks much nicer.
+
+           I took Juergen's idea a bit further and made the colors completely
+           customizable.  Assuming you're not printing the calendar (i.e. you
+           might be just previewing it on-screen to save on color ink/toner),
+           you can create some striking colorizations on your lunar
+           calendars.  For example, here's a favorite of mine:
+
+              lcal -O -s 0:1:1/0:0:0.7/0/1:1:0 | gv - -land
+
+           This is a one-page (odd-days-only) calendar.  The text color is
+           cyan, the background is a deep blue, the dark part of the moon is
+           solid black, and the light part of the moon is yellow.  The output
+           is piped into the 'GhostView' PostScript previewer and forced to
+           landscape page orientation.
+
+      2) Removed functionality:
+
+         - Support for the '-i' command-line option was removed.
+
+           This was used in previous versions to invert the colors.
+
+           With the enhanced colorization options described above, the '-i'
+           option became unneeded.
+
+   Credits:
+   
+      The original calendar PostScript was Copyright (c) 1987 by Patrick Wood
+      and Pipeline Associates, Inc. with permission to modify and
+      redistribute.
+   
+      The following people contributed to Lcal v2.1.0:
+
+         Enhanced color options:			Bill Marr
+         Inspiration:					Juergen Weigert
+
+      For a list of all known contributors to date, see the 'Authors' section
+      of the 'man' page.
+   
+   Bill Marr (marr99@users.sourceforge.net) 
+   07 Oct 2007
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
 "Lcal" Version 2.0.0
 
    This release of 'lcal' includes additional functionality, some bug fixes,

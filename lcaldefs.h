@@ -9,6 +9,16 @@
      
    Revision history:
 
+	2.1.0
+		B.Marr		2007-10-07
+		
+		Redefined default colors for '-s' (shading) command-line
+		option.
+		
+		Eliminated the '-i' command-line option to invert colors.  It
+		became unnecessary with the modification of the '-s'
+		command-line option.
+		
 	2.0.0
 		B.Marr		2006-07-20
 		
@@ -207,10 +217,20 @@ typedef struct {
 #endif
 
 /*
- * background/foreground colors (one grayscale value or three r:g:b values)
+ * Define the 4 default colors that can optionally be specified with the '-s'
+ * command-line option.  Each of the 4 colors is specified in the usual manner
+ * -- as a single grayscale value or as three r:g:b values.
+ * 
+ * The default is to have black text on a white page background with
+ * black/white moon colors.
+ * 
  */
-#define SHADING		"1/0"		/* default: black-on-white */
-#define INVERT		"0/1"		/* -i flag: white-on-black */
+#define DEFAULT_TEXT_COLOR                "0"
+#define DEFAULT_PAGE_BACKGROUND_COLOR     "1"
+#define DEFAULT_MOON_DARK_COLOR           "0"
+#define DEFAULT_MOON_LIGHT_COLOR          "1"
+#define DEFAULT_SHADING DEFAULT_TEXT_COLOR "/" DEFAULT_PAGE_BACKGROUND_COLOR "/" DEFAULT_MOON_DARK_COLOR "/" DEFAULT_MOON_LIGHT_COLOR
+
 #define RGB_CHAR	':'		/* r:g:b value separator */
 
 
@@ -234,8 +254,6 @@ typedef struct {
 
 #define F_SHADING	's'		/* set background/foreground shading */
 
-#define F_INVERT	'i'		/* print white on black background */
-
 #define F_HELP		'h'		/* generate help message */
 #define F_USAGE		'u'		/* generate usage message */
 #define F_VERSION	'v'		/* generate version stamp */
@@ -254,7 +272,14 @@ typedef struct {
 #define W_FILE		"<FILE>"
 #define W_VALUE		"<VALUE>"
 #define W_VAL2		"<n>{/<n>}"
-#define W_SHADING	"{<b>}{/<f>}"
+
+/* Oct 2007: Unfortunately, with the way that 'lcal' was designed to display
+   the options (via 'lcal -h') in neatly aligned columns, there is not nearly
+   enough space to show all the text required for the '-s' option format.
+   Because of that, we just use a parenthesized ellipsis ('(...)') to imply
+   that there is more to this than meets the eye.
+*/
+#define W_SHADING	"(...)"
 
 /* special flag_msg[] entries for end of option group, etc. */
 
