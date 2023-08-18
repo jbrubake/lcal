@@ -69,9 +69,8 @@ else   # Unix
 	D_BUILD_ENV	= -DBUILD_ENV_UNIX
 	LCAL		= lcal
 	CC		= /usr/bin/gcc
-	PACK		= compress
-	# PACK		= pack
-	# PACK		= gzip
+	PACK		= gzip
+	PREFIX          = /usr/local
 endif
 
 # 
@@ -101,11 +100,9 @@ DOCDIR	= .
 ifeq ($(OS),DJGPP)   # DOS+DJGPP
 	BINDIR = $(DJDIR)/bin
 	MANDIR = $(DJDIR)/man/man1
-	CATDIR = $(DJDIR)/man/cat1
 else   # Unix
-	BINDIR = /usr/local/bin
-	MANDIR = /usr/man/man1
-	CATDIR = /usr/man/cat1
+	BINDIR = $(PREFIX)/bin
+	MANDIR = $(PREFIX)/share/man/man1
 endif
 
 OBJECTS = $(OBJDIR)/lcal.o
@@ -197,7 +194,4 @@ install:	$(EXECDIR)/$(LCAL) man
 		cp $(DOCDIR)/lcal.man $(MANDIR)/lcal.1; \
 		$(PACK) $(MANDIR)/lcal.1; \
 	fi
-	if [ -d $(CATDIR) ]; then \
-		cp $(DOCDIR)/lcal.cat $(CATDIR)/lcal.1; \
-		$(PACK) $(CATDIR)/lcal.1; \
-	fi
+
