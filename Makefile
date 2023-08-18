@@ -81,7 +81,6 @@ endif
 #    - installed 'lcal' executable
 #    - documentation
 #    - 'man' pages
-#    - 'cat' pages
 # 
 # Unlike 'pcal', the simpler 'lcal' program really doesn't necessitate the use
 # of separate directories for all these items.  Therefore, the source, object,
@@ -95,7 +94,7 @@ DOCDIR	= .
 
 # 
 # Compiling for DOS+DJGPP requires different directories for the installed
-# executable and the 'man'/'cat' pages.  Unix uses the values shown below.
+# executable and the 'man' pages.  Unix uses the values shown below.
 # 
 ifeq ($(OS),DJGPP)   # DOS+DJGPP
 	BINDIR = $(DJDIR)/bin
@@ -168,8 +167,9 @@ $(OBJDIR)/lcal.o:	$(SRCDIR)/lcal.c $(SRCDIR)/lcaldefs.h
 # 
 clean:
 	rm -f $(OBJECTS) \
-		$(DOCDIR)/lcal.cat $(DOCDIR)/lcal-help.ps \
-		$(DOCDIR)/lcal-help.html $(DOCDIR)/lcal-help.txt
+		$(DOCDIR)/lcal-help.ps \
+		$(DOCDIR)/lcal-help.html \
+		$(DOCDIR)/lcal-help.txt
 
 # 
 # This target will delete everything, including the 'lcal' executable.
@@ -183,7 +183,6 @@ clobber: clean
 fresh:	clobber $(LCAL)
 
 man:	$(DOCDIR)/lcal.man
-	nroff -man $(DOCDIR)/lcal.man > $(DOCDIR)/lcal.cat
 	groff -man -Tps $(DOCDIR)/lcal.man >$(DOCDIR)/lcal-help.ps
 	groff -man -Thtml $(DOCDIR)/lcal.man >$(DOCDIR)/lcal-help.html
 	groff -man -Tascii $(DOCDIR)/lcal.man >$(DOCDIR)/lcal-help.txt
